@@ -34,6 +34,71 @@ If you already have VS Code and Docker installed, you can click the badge above 
 
 Next: **[Try it out!](#try-it)**
 
+## macOS Alternatives to Docker Desktop
+
+If you are on macOS and prefer not to use Docker Desktop, you can use one of the following open-source alternatives as the Docker socket provider. All three are OCI-compatible and work with the Dev Containers extension.
+
+### Apple Containers
+
+[Apple Containers](https://github.com/apple/container) is Apple's first-party containerization tool, written in Swift and optimized for **Apple Silicon**. It creates a dedicated lightweight virtual machine per container, giving strong isolation and sub-second start times.
+
+**Requirements:** Apple Silicon Mac + macOS 26
+
+```bash
+brew install container
+```
+
+After installing, Docker-compatible commands work via the `container` CLI. Point your `DOCKER_HOST` or Dev Containers settings to it if needed.
+
+> **Note:** Apple Containers does not yet support Kubernetes and requires macOS 26 or later. It is under active development.
+
+### Lima
+
+[Lima](https://github.com/lima-vm/lima) (LInux MAchines) is a CNCF incubating project that runs Linux VMs on macOS using QEMU or Apple's Virtualization framework. It provides automatic file sharing and port forwarding, similar to WSL2 on Windows.
+
+**Supports:** Intel and Apple Silicon, macOS and Linux
+
+```bash
+brew install lima
+
+# Start a Docker-enabled VM
+limactl start --name=default template://docker
+docker context create lima --docker "host=unix://${HOME}/.lima/default/sock/docker.sock"
+docker context use lima
+```
+
+### Colima
+
+[Colima](https://github.com/abiosoft/colima) (Containers on Lima) is a minimal-setup wrapper around Lima that starts a Docker-compatible runtime with a single command. It is the most straightforward Docker Desktop replacement for macOS.
+
+**Requirements:** macOS 13+
+
+```bash
+brew install colima docker
+
+colima start                               # Docker runtime (default)
+colima start --cpu 4 --memory 8            # with custom resources
+colima start --runtime containerd          # containerd instead of Docker
+colima start --kubernetes                  # with Kubernetes
+```
+
+Once Colima is running, the standard `docker` CLI and Dev Containers extension work without any additional configuration.
+
+> **Tip:** For VS Code development, we recommend at least `--cpu 4 --memory 8` to match the Docker Desktop minimums described below.
+
+### Comparison
+
+| | Apple Containers | Lima | Colima |
+|---|---|---|---|
+| Made by | Apple | CNCF / community | Community |
+| Default runtime | OCI/Linux | containerd | Docker |
+| VM model | 1 VM per container | Shared VM | Shared VM |
+| Requirements | macOS 26 + Apple Silicon | macOS (Intel or AS) | macOS 13+ |
+| Docker CLI compat | Yes | Via plugin | Yes |
+| Kubernetes | No | Yes | Yes |
+
+---
+
 ## Quick start - GitHub Codespaces
 
 1. From the [microsoft/vscode GitHub repository](https://github.com/microsoft/vscode), click on the **Code** dropdown, select **Open with Codespaces**, and then click on **New codespace**. If prompted, select the **Standard** machine size (which is also the default).
